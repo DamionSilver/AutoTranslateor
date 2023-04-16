@@ -1,3 +1,5 @@
+import os
+
 import keyboard as keyboard
 import pyaudio
 import speech_recognition as sr
@@ -84,7 +86,7 @@ stream = audio.open(
 )
 
 # Record the audio
-print("Press 's' to start recording to audio you would like to translate. Press esc once you are complete and want the translation...")
+print("Press 's' to start recording to audio you would like to translate. Press q once you are complete and want the translation...")
 
 frames = []
 recording = False
@@ -122,3 +124,5 @@ with sr.AudioFile("loopback_output.wav") as source:
     engine.say(translated_text)
     engine.runAndWait()
     print("Transcription:", text, translated_text)
+if os.path.exists('loopback_output.wav'):
+    os.remove('loopback_output.wav')
