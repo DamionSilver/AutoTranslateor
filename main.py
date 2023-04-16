@@ -1,3 +1,4 @@
+import keyboard as keyboard
 import pyaudio
 import speech_recognition as sr
 import wave
@@ -12,11 +13,50 @@ DURATION = 10  # Duration of the recording in seconds
 engine = pyttsx3.init()
 
 
-# List available voices
-voices = engine.getProperty('voices')
-for voice in voices:
-    print(f"Voice ID: {voice.id}, Name: {voice.name}, Lang: {voice.languages}")
 
+
+def case_one():
+    return  "en"
+
+def case_two():
+    return "es"
+
+def case_three():
+    return "fr"
+
+def case_four():
+    return "de"
+
+def case_five():
+    return "hi"
+
+def case_six():
+    return "ta-IN"
+
+def case_seventh():
+    return "ur-IN"
+
+def case_eigth():
+    return "te-IN"
+
+def case_ninth():
+    return "bn-BD"
+
+
+switch_dict = {
+    1: case_one,
+    2: case_two,
+    3: case_three,
+    4: case_four,
+    5: case_five,
+    6: case_six,
+    7: case_seventh,
+    8: case_eigth,
+    9: case_ninth()
+}
+user_input = int(input("Please select the language you will need translating to english. \n 1 for English \n 2 for Spanish \n 3 for French \n 4 for German \n 5 for Hindi \n 6 for Tamil \n 7 for Urdu \n 8 for Telugu \n 9 for Bengali \n  "))
+
+result = switch_dict.get(user_input)()
 # Find the loopback device
 audio = pyaudio.PyAudio()
 loopback_device = None
@@ -44,17 +84,26 @@ stream = audio.open(
 )
 
 # Record the audio
-print(f"Recording for {DURATION} seconds...")
-frames = []
-for _ in range(0, int(SAMPLE_RATE / CHUNK * DURATION)):
-    data = stream.read(CHUNK)
-    frames.append(data)
+print("Press 's' to start recording to audio you would like to translate. Press esc once you are complete and want the translation...")
 
+frames = []
+recording = False
+
+while True:
+    if keyboard.is_pressed('s') and not recording:
+        recording = True
+
+
+    if recording:
+        data = stream.read(CHUNK)
+        frames.append(data)
+    if keyboard.is_pressed('q'):
+        break
 # Stop the audio stream
 stream.stop_stream()
 stream.close()
 audio.terminate()
-engine.setProperty('voice', voices[2].id)
+#engine.setProperty('voice', voices[2].id)
 # Save the audio to a file
 with wave.open("loopback_output.wav", "wb") as wav_file:
     wav_file.setnchannels(CHANNELS)
@@ -65,11 +114,11 @@ with wave.open("loopback_output.wav", "wb") as wav_file:
 # Transcribe the audio using speech_recognition
 with sr.AudioFile("loopback_output.wav") as source:
     audio_data = recognizer.record(source)
-    text = recognizer.recognize_google(audio_data)
+    text = recognizer.recognize_google(audio_data, language=result)
     text_to_translate = text
 
-    print("Times Up....")
-    translated_text = GoogleTranslator(source='en', target='es').translate(text_to_translate)
+    print("Translating to english....")
+    translated_text = GoogleTranslator(source=result, target='en').translate(text_to_translate)
     engine.say(translated_text)
     engine.runAndWait()
     print("Transcription:", text, translated_text)
