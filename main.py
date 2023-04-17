@@ -116,13 +116,19 @@ with wave.open("loopback_output.wav", "wb") as wav_file:
 # Transcribe the audio using speech_recognition
 with sr.AudioFile("loopback_output.wav") as source:
     audio_data = recognizer.record(source)
-    text = recognizer.recognize_google(audio_data, language=result)
-    text_to_translate = text
+    try:
+        text = recognizer.recognize_google(audio_data, language=result)
+        text_to_translate = text
 
-    print("Translating to english....")
-    translated_text = GoogleTranslator(source=result, target='en').translate(text_to_translate)
-    engine.say(translated_text)
-    engine.runAndWait()
-    print("Transcription:", text, translated_text)
+        print("Translating to english....")
+        translated_text = GoogleTranslator(source=result, target='en').translate(text_to_translate)
+        engine.say(translated_text)
+        engine.runAndWait()
+        print("Transcription:", text, translated_text)
+    except sr.UnknownValueError:
+        print("The speech recognizer could not understand the audio.")
+    except sr.RequestError as e:
+        print(f"Could not request results from the Google Speech Recognition service; {e}")
+
 if os.path.exists('loopback_output.wav'):
     os.remove('loopback_output.wav')
